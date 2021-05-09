@@ -81,12 +81,22 @@ root@master:~# cp workers.template workers
 
 파일을 생성했다면 workers 파일 안에 적혀있는 localhost는 지워주고 아까 확인했던 worker 컨테이너의 ip를 적어줍니다.
 
+web ui에서 worker 정보를 확인하고 싶다면, worker에 master host를 등록해줘야 합니다. 등록을 하지 않더라도 worker는 작동하지만 worker 정보가 web ui에 보이지 않습니다.
+```shell
+
+root@worker# vi ${SPARK_HOME}/spark-env.sh
+root@master# export SPARK_MASTER_HOST=spark://{HOST_NAME}:7077
+```
+
 그럼 이제 worker 등록까지 완료되었으니 클러스터 매니저를 실행해보겠습니다.
 ```shell
 
 root@master# cd ${SPARK_HOME}/sbin
-root@master# ./start-all.sh
+root@master# ./start-master.sh
 starting org.apache.spark.deploy.....
+
+root@master# ./start-worker.sh spark://{HOST_NAME}:{PORT}
+...
 ```
 
 localhost:8080에 접속해 master web ui를 확인했을 때, worker에 뭔가 제대로 등록되어 있다면 성공!
