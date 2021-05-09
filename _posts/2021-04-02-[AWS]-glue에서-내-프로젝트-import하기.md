@@ -34,9 +34,6 @@ setup.py로 프로젝트를 빌드하되, egg 파일로 압축하겠습니다.
 python setup.py bdist_egg
 ```
 
-![image1](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ad1414eb-5875-4149-afce-c8253c496750/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20210401%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20210401T153058Z&X-Amz-Expires=86400&X-Amz-Signature=f5ae15d1b36153bcfcd492abdd8f1a5563daf9c16797d3ce84ec1ee84c5df1b0&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
-
-
 
 해당 egg 파일을 job -> Python library path에 입력합니다.
 
