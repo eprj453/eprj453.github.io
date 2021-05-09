@@ -2,6 +2,8 @@
 layout: post
 title: "[AWS] glue에서 내 프로젝트 import하기"
 date: 2021-04-02 00:00:00
+categories:
+- AWS
 tags: [AWS]
 ---
 
