@@ -6,8 +6,9 @@ categories:
 tags: [spark, docker]
 
 ---
+worker 컨테이너를 띄우고 master 컨테이너와 연결해보겠습니다.
 
-# worker 컨테이너
+# worker 컨테이너 생성
 
 master용 컨테이너를 만들었으니, worker용으로 사용할 컨테이너를 하나 띄워보겠습니다. worker는 더 늘려도 관계없고, 꼭 컨테이너를 띄워 독립적인 환경에서 구성하지 않아도 됩니다.
 
