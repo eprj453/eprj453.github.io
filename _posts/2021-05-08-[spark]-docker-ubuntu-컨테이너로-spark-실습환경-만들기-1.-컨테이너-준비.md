@@ -126,7 +126,7 @@ psw/hadoop-spark                                                     latest     
 먼저 마스터로 사용할 컨테이너를 띄웁니다.
 
 ```bash
-docker run -itd --name spark-master -p 9870:9870 -p 8080:8080 hadoop-spark
+docker run -itd --name spark-master -p 9870:9870 -p 8080:8080 -v {로컬 폴더경로}:{컨테이너 내부 폴더경로}hadoop-spark
 ```
 
 포트의 용도는
@@ -136,13 +136,33 @@ docker run -itd --name spark-master -p 9870:9870 -p 8080:8080 hadoop-spark
 
 입니다.
 
+-v로 볼륨 마운트를 해서 로컬에서 작성하는 코드를 도커 컨테이너에 바로 마운트가 가능하도록 해줍니다. 로컬 폴더는 코드를 작성하는 폴더라면 아무 폴더나 상관없지만 (위키북스 스파크 github)[https://github.com/wikibook/spark]을 통으로 clone 받아서 마운트시키는걸 추천합니다. 
+
 포트가 잘 바인딩되었는지 확인하고, 컨테이너에 접속합니다.
 
 ```bash
 docker exec -it spark-master bash
 ```
 
-책 191P의 예제 파일 HDFS 업로드를 실행합니다. namenode host와 port는 위에서 설정한 하둡 파일 중 `core-site.xml`의 `fs.defaultFS`의 value를 따라갑니다.
+
+
+책에서는 예제로 HDFS에 README를 올려서 샘플 파일로 사용합니다. 그 전에  namenode, datanode가 제대로 올라가는지 확인해보겠습니다.
+
+```shell
+hdfs namenode -format
+hdfs namenode &
+
+hdfs datanode -foramt
+hdfs datanode &
+```
+
+localhost:9870으로 접속했을 때 하둡에 대한 overview 페이지가 나온다면 성공입니다.
+
+![image](https://user-images.githubusercontent.com/52685258/118149300-6205e600-b44c-11eb-9ba6-dfb1638152d8.png)
+
+
+
+책 191P의 예제 파일 HDFS 업로드를 실행합니다. namenode host와 port는 (위에서 설정)[https://alibaba-cloud.medium.com/how-to-install-hadoop-cluster-on-ubuntu-16-04-bd9f52e5447c]한 하둡 파일 중 `core-site.xml`의 `fs.defaultFS`의 value를 따라갑니다.
 
 ```bash
 # hdfs dfs -mkdir hdfs://{namenode_host:port}/sample

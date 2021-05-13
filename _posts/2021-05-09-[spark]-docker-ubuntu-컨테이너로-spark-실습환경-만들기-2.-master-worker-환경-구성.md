@@ -74,7 +74,6 @@ root@worker:~#
 # worker 등록
 master에 worker를 등록합니다. master 컨테이너의 ${SPARK_HOME}/conf로 들어간 뒤, workers.template 파일을 slaves 파일로 복사합니다.
 ```shell
-
 root@master# cd ${SPARK_HOME}/conf
 root@master:~# cp workers.template workers
 ```
