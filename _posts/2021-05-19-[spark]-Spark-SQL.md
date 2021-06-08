@@ -6,7 +6,7 @@ categories:
 tags: [spark]
 ---
 
-처음에 spark sql은 이름만 보고 스파크에서도 sql을 사용할 수 있구나! 정도로 생각했지만 spark sql은 이보다 좀 더 큰 범위의 기능을 제공합니다. spark sql은 단순히 sql을 사용하는 것은 물론, sql과 비슷한 개념으로 dataframe / dataset에서 데이터를 처리할 수 있도록 여러 메서드도 제공합니다.
+처음에 spark sql을 보고 스파크에서도 sql을 사용할 수 있구나! 정도로 생각했지만 spark sql은 이보다 좀 더 큰 범위의 기능을 제공합니다. spark sql은 단순히 sql을 사용하는 것은 물론, sql과 비슷한 개념으로 dataframe / dataset에서 데이터를 처리할 수 있도록 여러 메서드도 제공합니다.
 
 spark sql이 생겨난 배경과 그 기능을 살펴보겠습니다.
 
@@ -32,7 +32,9 @@ RDD에 대해 자세히 다루지는 않겠지만,
 
 위에서도 언급했지만 spark sql은 sql을 이용해 연산을 할 수 있을뿐 아니라 dataframe / dataset 환경 또한 제공합니다. 그렇기 때문에 Spark SQL은 하나의 개념이라고 보는 것이 맞다고 생각합니다.
 
-dataframe과 dataset은 완전히 다른 것이 아닙니다. 처음에는 언어에 관계없이 dataframe을 가지고 연산을 했으나, 이후에 dataset이 등장하고 스파크 2.0부터 dataframe이 dataset 클래스로 통합되었습니다. 그에 따라 언어에 따라 DataFrame / DataSet 개념도 조금씩 달라졌습니다.
+처음에는 언어에 관계없이 dataframe을 가지고 연산을 했으나, 이후에 dataset이 등장하고 스파크 2.0부터 dataframe이 dataset 클래스로 통합되었습니다. 
+
+그에 따라 언어에 따라 DataFrame / DataSet 사용법이 조금씩 달라졌지만, 둘은 같은 개념입니다. 
 
 - 스칼라는 dataframe과 dataset을 동시에 사용
 
