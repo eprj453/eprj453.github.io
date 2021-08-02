@@ -23,11 +23,15 @@ Data stream으로 로그를 수집하면 뒤에서 설명할 firehose 뿐만 아
 
 데이터 저장소답게 data stream에 전송된 데이터는 retension period 기간만큼 저장됩니다. retension period는 기본 1일입니다. 추가로 요금을 지불하면 최대 7일까지 데이터를 보관할 수 있고 polling을 하면 언제든 가져갈 수 있습니다.
 
+
+
 <br/>
 
 # Shard
 
 Data stream은 최소 1개, 최대 200개의 shard로 구성됩니다. shard의 갯수가 늘어날수록 소화할 수 있는 데이터의 양은 커지고, 그만큼 비용도 증가합니다. 
+
+![image](https://user-images.githubusercontent.com/52685258/127923232-2448ce4d-f35b-4d94-b280-6bb2ef4fb919.png)
 
 1 shard의 스펙은 다음과 같습니다.
 
@@ -48,9 +52,11 @@ https://medium.com/slalom-data-analytics/amazon-kinesis-data-streams-auto-scalin
 
 # Producing
 
+
+
 ![image](https://user-images.githubusercontent.com/52685258/127911376-713b48cf-6296-4af7-98d4-1525f8ea99f9.png)
 
-n개의 producer에서 log를 수신하면, 특정 hash function을 거쳐 고유 record id를 부여받습니다. 고유 record id를 부여받은 record들은 그림과 같이 shard에 차곡차곡 쌓이고, consumer는 이 shard를 기준으로 데이터를 가져갑니다. 데이터를 polling할 때 offset도 이 record id를 기준으로 합니다.
+n개의 producer에서 데이터를 수신하면, 데이터들은 특정 hash function을 거쳐 고유 record id를 부여받습니다. 고유 record id를 부여받은 record들은 그림과 같이 shard에 차곡차곡 쌓이고, consumer는 이 shard를 기준으로 데이터를 가져갑니다. 데이터를 polling할 때 offset도 이 record id를 기준으로 합니다. consumer는 data stream을 바라보는 것이 아니라 shard를 바라본다는 개념이 kinesis를 사용하는 데 중요합니다.
 
 데이터를 push할때 hask key와 sequence number를 수동으로 지정하는 것도 가능하지만, 저는 이 기능을 사용하지 않았습니다. Sequence number와 hash key 모두 kinesis에서 자동으로 지정해주는 데에 큰 불편함을 느끼지 못했습니다.
 
@@ -77,6 +83,12 @@ Consuming은 크게 2가지 방법이 있습니다.
 저는 이 polling을 위해 lambda function 등을 띄우는 것도 여의치 않아서 firehose를 data stream에 consumer로 두는 방법을 선택했습니다. 
 
 뒤에서 설명이 되겠지만 firehose에도 바로 데이터를 push할 수 있습니다. 그럼에도 data stream -> firehose의 workflow를 만든 것은 추후 analytics 등이 붙을 확률이 높기도 하고, 현재 데이터를 수신하는 곳 외에도 데이터를 보내야 할 곳이 많아지면 1 stream에 n개의 consumer를 꽂는 구조를 만들어 놓는게 편하기 때문입니다.
+
+
+
+![image](https://user-images.githubusercontent.com/52685258/127923074-ff4d7bfd-a5b4-4d1e-8b93-e58461460f42.png)
+
+
 
 
 
