@@ -33,7 +33,7 @@ Data stream은 최소 1개, 최대 200개의 shard로 구성됩니다. shard의 
 
 ![image](https://user-images.githubusercontent.com/52685258/127923232-2448ce4d-f35b-4d94-b280-6bb2ef4fb919.png)
 
-1 shard의 스펙은 다음과 같습니다.
+1 shard의 처리 가능 스펙은 다음과 같습니다.
 
 - ingest : 1mb / 1000 record
 - Consume : 2mb / 5TPS
@@ -44,7 +44,7 @@ https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html
 
 
 
-안타깝게도 shard는 자체 오토 스케일링을 지원하지 않습니다. 이를 위해서는 추가 API 개발이 필요합니다. 자세한 사항은 이 포스트에 잘 정리되어 있습니다.
+안타깝게도 shard는 자체 오토 스케일링을 지원하지 않습니다. 이를 위해서는 추가 API 개발이 필요합니다. 자세한 사항은 이 포스트에 정리되어 있습니다.
 
 https://medium.com/slalom-data-analytics/amazon-kinesis-data-streams-auto-scaling-the-number-of-shards-105dc967bed5
 
