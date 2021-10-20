@@ -1,6 +1,6 @@
 ---
-title: "[AWS] Kinesis 도입기 2. lambda"
-date: 2021-08-18 00:00:00
+title: "[AWS] MWAA 사용기"
+date: 2021-09-27 00:00:00
 categories:
 - AWS
 tags: [AWS]
@@ -8,312 +8,90 @@ tags: [AWS]
 
 
 
-firehose에서는 Lambda를 통해 데이터를 가공하거나, glue data catalog를 통해 데이터 타입 검증, 포맷 변경이 가능합니다. 
+8월 31일에 MWAA(Amazon Managed Workflows for Apache Airflow)가 서울 리전에도 출시되었습니다. 짝짝!!
 
-<br/>
+https://aws.amazon.com/ko/about-aws/whats-new/2021/08/amazon-managed-workflows-apache-airflow-mwaa/
 
-
-
-# lambda
-
-Lambda 함수를 통해 firehose로 들어온 데이터를 가공할 수 있습니다. Firehose로 직접 쏘든, data stream에서 데이터를 받든 형태는 2가지이고, 받는 방식은 동일합니다.
-
-- 단일 레코드
-- 2개 이상의 레코드
-
-제가 사용했던 Lambda입니다.
-
-```python
-import awswrangler as wr
-import pandas as pd
-import numpy as np
-import json
-import base64
-import time
-from pprint import pprint
-
-# 모든 데이터의 타입을 string(object)로 변경합니다.
-def type_to_object(obj):
-    if type(obj) == list:
-        return [str(i) for i in obj]
-    else:
-        return str(obj)
-
-# {a:{b:1, c:2}} 형태의 dictionary를 {a.b:1, a.c:2} 형태로 편 뒤 json 형태로 dump합니다.
-def flatten_json(nested_json: dict):
-    flat_json = {}
-
-    for key, value in nested_json.items():
-        if value and type(value) == dict:
-            for inside_key, inside_value in value.items():
-                merged_key = f'{key}.{inside_key}'
-                flat_json[merged_key] = json.dumps(type_to_object(inside_value))
-        else:
-            flat_json[key] = json.dumps(type_to_object(value))
-
-    return flat_json
-
-
-# dictionary를 json으로 dump한 뒤 base64로 인코딩합니다 
-def dict_to_bytes(value):
-    json_to_str = json.dumps(value)
-    return base64.b64encode(json_to_str.encode('utf-8'))
-
-  
-# return value 형태를 잡아줍니다.
-def generate_result_value(dict_bytes, record_id):
-    return {
-        'data': dict_bytes,
-        'recordId': record_id,
-        'result': 'Ok'
-    }
-    
-    
-
-def lambda_handler(event, context):
-    records = []
-    
-    for record in event['records']:
-        record_id = record['recordId']
-        payload = base64.b64decode(record['data']).decode('utf-8')
-        nested_json_list = json.loads(payload)
-        flat_dict_list = [flatten_json(nested_json) for nested_json in nested_json_list]
-    
-        for flat_dict in flat_dict_list:
-            dict_byte = dict_to_bytes(flat_dict)
-            result_value = generate_result_value(dict_byte, record_id)
-            records.append(result_value)
-        
-    return {
-        'records': records
-    }
-    
-    
-```
-
-
-
-
-
-lambda_handler 함수 -> event 인자 -> records 안에 firehose에서 넘겨받은 데이터가 들어있습니다. 이것을 원하는 형태로 가공해 다시 return해야 합니다. 
-
-record는 Bytes 코드로 들어오기 때문에 디코딩 처리가 필요합니다. 디코딩 처리가 된 payload는 str이 아닌 dictionary / list 형태로 처리가 가능합니다.
-
-```python
-def lambda_handler(event, context):
-    for record in event['records']:
-        data = record['data']
-        payload = base64.b64decode(data).decode('utf-8')
-```
-
-
-
-Record 하나가 벌크로 묶은 json list인 경우, 처리 이후에도 record 안에서 for loop를 돌며 return value 형식으로 값을 넣어줍니다.
-
-```python
-record_id_idx = 0
-for flat_dict in flat_dict_list:
-  dict_byte = dict_to_bytes(flat_dict)
-  result_value = generate_result_value(dict_byte, record_id + str(record_id_idx) if record_id_idx != 0 else record_id)
-  records.append(result_value)
-  record_id_idx += 1
-```
+그동안 온프레미스 환경에서 airflow를 사용하며 이런저런 애로사항이 있었는데, 서울 리전에도 출시가 되어서 한번 사용해봤습니다. MWAA 자체가 나온지 1년도 채 되지 않았고 서울 리전 출시도 늦은 편이라 usecase도 많지 않고 저 또한 많은 부족함이 있으나 MWAA를 사용하시는 분들께 도움이 되면 좋겠습니다.
 
 
 
 <br/>
 
-## lambda 주의점
-
-lambda에서 제공하는 blueprint에서 firehose용 템플릿도 제공하고 있습니다. 이걸 사용하지만 웬만한 커스텀은 어렵지 않을것입니다. 아래 공식문서에서 lambda blueprint 파트를 참고해주세요.
-
-[https://docs.aws.amazon.com/ko_kr/firehose/latest/dev/data-transformation.html](https://docs.aws.amazon.com/ko_kr/firehose/latest/dev/data-transformation.html)
+# MWAA
 
 
 
-### return value 형식
+## 장점
 
-- firehose 내에서 Lambda를 거칠 때, Lambda의 return value 형식이 고정되어 있습니다. 형식에 맞지 않을 경우 processing-failed 에러를 발생시킵니다. 자세한 내용은 공식 문서를 참고해주세요.
-
-  https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling
-
-```python
-return {
-  'records' : [
-     	{
-        'data': data,
-        'recordId': record_id,
-        'result': 'Ok'
-      },
-      {
-        'data': data,
-        'recordId': record_id,
-        'result': 'Ok'
-  		}
-    ...
-    ...
-    ...
-    ...
-					]
-  }
-```
+boto3와 같은 SDK, 다른 AWS 서비스(ex: lambda)로 리소스 관리를 할 수 있다는 점, 따로 webserver / scheduler 설정을 할 필요가 없다는 점이 MWAA의 장점이라 할 수 있습니다. 
 
 
 
-위  List 형태의 객체를 넘기되, `records`라는 key를 가진 딕셔너리를 반환해야 합니다.
+## 단점
 
-firehose에서 s3 error backup을 해두면, 에러가 났을때 아래와 같이 에러 메세지와 원본 데이터가 담긴 파일을 떨궈줍니다. return 형식이 맞지 않거나 key 이름이 다른 경우 발생하는 에러 메세지 일부입니다.
+S3에 dag 소스파일과 custom 모듈, requirements.txt를 업로드해 사용하는 전형적인 AWS식 소스 관리 방법을 따르고 있습니다. GCP cloud composer는 Airflow를 프레임워크 그대로 개발해 배포까지 이어지는, 흔히 말하는 Drop-in replacement가 가능하도록 되어있는 것 같은데 S3에 파이썬 스크립트를 파일 단위로 업로드하며 관리하는 방식은 좀 아쉽네요. 소스 관리가 상당히 귀찮겠습니다.
 
-```json
-{
-  "attemptsMade":4,
-  "arrivalTimestamp":1627921286181,
-  "errorCode":"Lambda.FunctionError",
-  "errorMessage":"The Lambda function was successfully invoked but it returned an error result.",
- "attemptEndingTimestamp":1627921366634,"rawData":"YidbeyJhcGlfbGV2ZWwiOjMwLCJhcGlfcHJvcGVydGllcyI6eyJhbmRyb2lkQURJRCI6Ijg5MzExNjgyLTIxNDQtNDc5OC04OTZiLTZhNTBjMTUyZTdhZiIsImdwc19lbmFibGVkIjp0cnVlLCJsaW1pdF9hZF90cmFja2luZ
-  ....
-  ....
-  ....
-```
+버전도 2개밖에 없습니다. 1버전과 2버전에서 가장 안정적인 버전 1개씩만을 지원하는것 같네요.
+
+
+
+## 결론
+
+많이 쓰일것 같은 서비스는 아닐것 같습니다. 흔히 말하는 drop in replacement가 좀 없는 느낌..? 
+
+S3까지 이어지는 파이프라인은 codepipeline이나 codebuild도 따로 구축해야 할텐데... GCP Cloud Composer는 이런 부분이 꽤 간편한걸로 알고 있습니다.
+
+AWS에서 airflow를 쓰려면 아직은 직접 개발해서 EKS에다 배포해서 쓰는게 더 편할거 같습니다.
+
+
 
 <br/>
 
-### record_id 중복
+# 테스트
 
-- return으로 들어가는 records마다 존재하는 recordId는 중복되면 안됩니다.
+job을 하나 띄워보고 External module, requirements.txt까지 제대로 동작하는지 보겠습니다.
 
-사실 이 사항은 record 형태에 따라 문제가 될수도, 되지 않을수도 있겠으나 맨 처음 lambda에서 `event['records']` 에 있는 원본 데이터의 형태가 이런 식이라면 문제가 될 수 있습니다.
+MWAA 첫 화면입니다. Create environment로 airflow를 띄울 수 있습니다. 
 
-```python
-event['records'] = [
-  [{}, {}, {}, {}], # record
-  [{}, {}, {}, {}, {}], # record
-  [{}, {}, {}, {}, {}], # record
-  ...
-  ...
-  ...
-]
-```
-
-record가 object list인 경우입니다. 이 경우에는 record를 다시 풀어서 각각 하나의 object로 보고 처리를 해야하는데, 이 때 record id가 문제가 될 수 있습니다. object 처리를 잘못 할 경우 아래와 같이 record_id가 중복될 수 있습니다. 임의의 데이터와 record_id가 있다고 가정해본다면 이런 상황입니다.
-
-```python
-event['records'] = [
-  [{1}, {2}, {3}, {4}], # record (record_id = 1)
-  [{5}, {6}, {7}, {8}, {9}], # record (record_id = 2)
-  [{10}, {11}, {12}, {13}, {14}], # record (record_id = 3)
-  ...
-  ...
-  ...
-]
-
-
-return {
-  'records': [
-    {data:1, record_id: 1},
-    {data:2, record_id: 1},
-    {data:3, record_id: 1},
-    {data:4, record_id: 1},
-    {data:5, record_id: 2},
-    ...
-    ...
-    ...
-  ]
-}
-```
+![image](https://user-images.githubusercontent.com/52685258/135724592-53831ce8-8184-44b1-9887-fef3f46c7e49.png)
 
 
 
-위에서 제가 사용했던 예시 Lambda도 저대로 바로 쓰면 에러가 일어납니다. record_id의 중복을 피하기 위해 다음과 같이 로직을 변경했습니다.
+기본 정보입니다. Airflow 버전과 dag 폴더, 플러그인 zip 파일, requirements.txt 파일이 있는 S3 경로를 지정합니다. S3 버킷은 `airflow-*` 형태의 이름을 가지고 있어야 하며, 경로에 파일이 없거나 규칙에 어긋나면 다음으로 넘어갈 수 없습니다.
 
-예시 Lambda 함수에 이 로직이 들어있는 것이 이것 때문입니다. Input과 output의 record_id가 꼭 같을 필요는 없습니다. output에 들어갈 record_id를 각각 다르게 주기 위한 방법입니다.
+2021년 10월 현재 선택할 수 있는 버전은  
 
-```python
-	import awswrangler as wr
-import pandas as pd
-import numpy as np
-import json
-import base64
-import time
-from pprint import pprint
+- 1.10.12
+- 2.0.2 
 
-# 모든 데이터의 타입을 string(object)로 변경합니다.
-def type_to_object(obj):
-    if type(obj) == list:
-        return [str(i) for i in obj]
-    else:
-        return str(obj)
+2가지입니다. 음... 처음부터 MWAA를 사용하는 분들에게는 문제가 되지 않을수도 있겠으나 저처럼 다른 환경에서 AWS 환경으로 airflow를 이관하려는 분들에게는 이 또한 치명적일 수 있겠습니다.
 
-# {a:{b:1, c:2}} 형태의 dictionary를 {a.b:1, a.c:2} 형태로 편 뒤 json 형태로 dump합니다.
-def flatten_json(nested_json: dict):
-    flat_json = {}
+플러그인은 `$AIRFLOW_HOME/plugins`에 저장해 바로 import해서 사용할 수 있는 airflow에서 제공하는 기본 기능입니다. custom module을 여기에 등록해서 사용하게 되는데, 프레임워크 단위로 코드 관리를 하면 더 좋지 않을까? 하는 생각이 여기에서도 들긴 합니다. 공식 문서는 [여기](https://airflow.apache.org/docs/apache-airflow/stable/plugins.html) 
 
-    for key, value in nested_json.items():
-        if value and type(value) == dict:
-            for inside_key, inside_value in value.items():
-                merged_key = f'{key}.{inside_key}'
-                flat_json[merged_key] = json.dumps(type_to_object(inside_value))
-        else:
-            flat_json[key] = json.dumps(type_to_object(value))
+설명에는 
 
-    return flat_json
-
-
-# dictionary를 json으로 dump한 뒤 base64로 인코딩합니다 
-def dict_to_bytes(value):
-    json_to_str = json.dumps(value)
-    return base64.b64encode(json_to_str.encode('utf-8'))
-
-  
-# return value 형태를 잡아줍니다.
-def generate_result_value(dict_bytes, record_id):
-    return {
-        'data': dict_bytes,
-        'recordId': record_id,
-        'result': 'Ok'
-    }
-    
-    
-
-def lambda_handler(event, context):
-    records = []
-    
-    for record in event['records']:
-        record_id = record['recordId']
-        payload = base64.b64decode(record['data']).decode('utf-8')
-        nested_json_list = json.loads(payload)
-        flat_dict_list = [flatten_json(nested_json) for nested_json in nested_json_list]
-    
-        record_id_idx = 0 ####### 변경사항 #######
-        for flat_dict in flat_dict_list:
-            dict_byte = dict_to_bytes(flat_dict)
-            result_value = generate_result_value(dict_byte, record_id + str(record_id_idx) if record_id_idx != 0 else record_id)
-            records.append(result_value)
-            record_id_idx += 1
-            
-    return {
-        'records': records
-    }
-  
-```
+![image](https://user-images.githubusercontent.com/52685258/135724688-74e9daec-d7e5-44ed-abab-b047f4830e59.png)
 
 <br/>
 
-### 최대 호출 가능한 lambda 갯수
+다음으로는 네트워크, 리소스 등 상세 설정입니다. 
 
-- data stream을 Firehose의 source로 사용할 경우 고려해야 할 점입니다. Lambda는 1 shard 당 5개까지만 뜰 수 있습니다. 즉, 하나의 lambda 함수가 데이터를 처리하고 내려가는 속도보다 firehose의 lambda buffer가 차는 속도가 더 빨라 5개 이상의 lambda가 뜨는 순간, lambda는 죽어버립니다. 
-- 저의 경우 cloudwatch에서 다음과 같은 에러 로그를 확인할 수 있었습니다. 에러 로그나 상황은 다 다르겠지만, shard를 적게 잡고 firehose + lambda를 사용중이시라면 shard 갯수를 늘려보시기 바랍니다.
+네트워크는 subnet 2개가 있는 VPC 하나를 필요로 합니다. UI를 띄우는 과정에서 webserver - environments를 연결하고 접근을 관리하기 위해 필요한 등록이라 보시면 되겠습니다. 
 
-```python
-[ERROR] JSONDecodeError: Expecting value: line 1 column 1 (char 0)
-Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 51, in lambda_handler
-    nested_json_list = json.loads(payload)
-  File "/var/lang/lib/python3.8/json/__init__.py", line 357, in loads
-    return _default_decoder.decode(s)
-  File "/var/lang/lib/python3.8/json/decoder.py", line 337, in decode
-    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-  File "/var/lang/lib/python3.8/json/decoder.py", line 355, in raw_decode
-    raise JSONDecodeError("Expecting value", s, err.value) from None
-```
+MWAA 설정에서는 따로 언급하지 않는데, WEB UI에 기본적으로 EIP가 하나 붙습니다. 만약 등록할 수 있는 EIP 갯수가 최대치라면 Environments 설정을 끝까지 마치고 환경을 생성하더라도 Creating에서 몇시간 멈춰있다가 Fail이 떨어지는 사태가 벌어질 수 있습니다.
+
+https://docs.aws.amazon.com/mwaa/latest/userguide/t-create-update-environment.html#t-stuck-failure
+
+여기에서는 VPC에 문제가 있는지 확인해보라고 하지만, 정상적으로 2개의 subnet이 있는 VPC를 등록했는데도 Stuck in Creating을 만난다면 생성할 수 있는 EIP 갯수를 넘은게 아닌지 한번 체크해보시기 바랍니다. 
+
+그 다음으로는 리소스를 어떻게 쓸 것인지, 로그는 어떻게 남길 것인지 등에 대한 사항들을 입력합니다. 이 부분은 사용자의 환경마다 상이하기 때문에 본인의 환경에 맞는 세팅을 해주시면 되겠습니다. Step 3는 최종 확인 절차이기 때문에 실질적으로는 이게 세팅의 전부입니다.
+
+![image](https://user-images.githubusercontent.com/52685258/135725012-7e515c9f-aa14-4443-9448-fc2f67c9f306.png)
+
+<br/>
+
+생성을 마치고 
+
+
 
