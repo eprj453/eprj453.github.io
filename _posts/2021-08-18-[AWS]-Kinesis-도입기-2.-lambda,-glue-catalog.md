@@ -24,7 +24,7 @@ https://aws.amazon.com/ko/about-aws/whats-new/2021/08/amazon-managed-workflows-a
 
 ## 장점
 
-boto3와 같은 SDK, 다른 AWS 서비스(ex: lambda)로 리소스 관리를 할 수 있다는 점, 따로 webserver / scheduler 설정을 할 필요가 없다는 점이 MWAA의 장점이라 할 수 있습니다. 
+boto3와 같은 SDK, 다른 AWS 서비스(ex: lambda)로 리소스 관리를 할 수 있다는 점, 따로 webserver / scheduler 등 환경 설정 및 리소스 산정을 할 필요가 없다는 점이 MWAA의 장점이라 할 수 있습니다. 
 
 
 
@@ -38,11 +38,11 @@ S3에 dag 소스파일과 custom 모듈, requirements.txt를 업로드해 사용
 
 ## 결론
 
-많이 쓰일것 같은 서비스는 아닐것 같습니다. 흔히 말하는 drop in replacement가 좀 없는 느낌..? 
+많이 쓰일것 같은 서비스는 아닐것 같습니다.
 
-S3까지 이어지는 파이프라인은 codepipeline이나 codebuild도 따로 구축해야 할텐데... GCP Cloud Composer는 이런 부분이 꽤 간편한걸로 알고 있습니다.
+S3까지 이어지는 파이프라인은 codepipeline도 따로 구축해야 할텐데... GCP Cloud Composer는 이런 부분이 꽤 간편한걸로 알고 있는데 좀 아쉽습니다.
 
-AWS에서 airflow를 쓰려면 아직은 직접 개발해서 EKS에다 배포해서 쓰는게 더 편할거 같습니다.
+AWS에서 airflow를 쓰려면 아직은 직접 개발해서 EKS에다 배포해서 쓰는게 더 편할거 같습니다. 단, 환경 구축이나 리소스 산정을 빠르게 하고 싶다면 MWAA는 나쁘지 않은 대안이라 생각합니다.
 
 
 
@@ -69,7 +69,7 @@ MWAA 첫 화면입니다. Create environment로 airflow를 띄울 수 있습니�
 
 플러그인은 `$AIRFLOW_HOME/plugins`에 저장해 바로 import해서 사용할 수 있는 airflow에서 제공하는 기본 기능입니다. custom module을 여기에 등록해서 사용하게 되는데, 프레임워크 단위로 코드 관리를 하면 더 좋지 않을까? 하는 생각이 여기에서도 들긴 합니다. 공식 문서는 [여기](https://airflow.apache.org/docs/apache-airflow/stable/plugins.html) 
 
-설명에는 
+<br/>
 
 ![image](https://user-images.githubusercontent.com/52685258/135724688-74e9daec-d7e5-44ed-abab-b047f4830e59.png)
 
@@ -77,7 +77,7 @@ MWAA 첫 화면입니다. Create environment로 airflow를 띄울 수 있습니�
 
 다음으로는 네트워크, 리소스 등 상세 설정입니다. 
 
-네트워크는 subnet 2개가 있는 VPC 하나를 필요로 합니다. UI를 띄우는 과정에서 webserver - environments를 연결하고 접근을 관리하기 위해 필요한 등록이라 보시면 되겠습니다. 
+네트워크는 subnet 2개가 있는 VPC 하나를 필요로 합니다. UI를 띄우는 과정에서 webserver - environments를 연결하고 접근을 관리하기 위해 필요한 등록이라 보시면 되겠습니다. 그 외에도 airflow가 접근해야 할 리소스(redshift, s3, dynamodb...) 또한 VPC의 범위를 산정하는데 필요합니다.
 
 MWAA 설정에서는 따로 언급하지 않는데, WEB UI에 기본적으로 EIP가 하나 붙습니다. 만약 등록할 수 있는 EIP 갯수가 최대치라면 Environments 설정을 끝까지 마치고 환경을 생성하더라도 Creating에서 몇시간 멈춰있다가 Fail이 떨어지는 사태가 벌어질 수 있습니다.
 
@@ -91,7 +91,19 @@ https://docs.aws.amazon.com/mwaa/latest/userguide/t-create-update-environment.ht
 
 <br/>
 
-생성을 마치고 
+완료하면 airflow environment가 생성됩니다.
+
+![image](https://user-images.githubusercontent.com/52685258/142954339-8c7e0be4-3d40-42d7-9933-03f772e95dd7.png)
+
+UI에도 바로 접속할 수 있습니다.
+
+![image](https://user-images.githubusercontent.com/52685258/142954502-2944f537-d798-4bf1-b158-e704efc9910c.png)
+
+
+
+폴더 구조는 아래 github 참고했습니다.
+
+https://github.com/czam01/mwaa
 
 
 
