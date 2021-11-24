@@ -101,9 +101,11 @@ UI에도 바로 접속할 수 있습니다.
 
 
 
-폴더 구조는 아래 github 참고했습니다.
+폴더 구조는 아래 github 참고했습니다. DAG는 dags 폴더에, plugins를 포함한 커스텀 모듈은 plugins 폴더에 들어있습니다. plugins를 포함한 내부 모듈에만 init 파일이 있습니다. 따로 압축을 해서 업로드하는 방식이기 때문에 이렇게 plugins 폴더에만 init 파일로 패키지임을 명시합니다. 
 
 https://github.com/czam01/mwaa
+
+MWAA에서 path만 잘 잡아주면 잘 인식합니다! :)
 
 
 
