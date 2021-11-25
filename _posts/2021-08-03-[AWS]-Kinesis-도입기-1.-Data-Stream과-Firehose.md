@@ -17,7 +17,7 @@ tags: [AWS]
 
 # Data Stream
 
-kinesis에서 데이터 수집을 할 수 있는 가장 간단한 방법입니다. Producer와 Consumer를 지정할 수 있는 메세지 큐와 비슷한 형태를 띄고 있는 듯 하지만, 실시간 데이터 처리가 가능한 데이터 저장소라고 보는 게 더 맞을 것 같습니다.
+kinesis에서 데이터 수집을 할 수 있는 가장 간단한 방법입니다. Producer와 Consumer를 지정할 수 있는 메세지 큐와 비슷한 형태를 띄고 있는 듯 하지만, 실시간 데이터 처리가 가능한 데이터 저장소라고 보는 게 더 맞을 것 같습니다. kafka의 broker와 역할과 구조가 유사합니다.
 
 Data stream으로 로그를 수집하면 뒤에서 설명할 firehose 뿐만 아니라 Analytics와 같은 다른 kinesis 서비스, Kinesis 라이브러리로 사용자가 직접 개발한 어플리케이션에서 로그를 편리하게 당겨갈 수 있다는 장점이 있습니다.
 
@@ -29,7 +29,7 @@ Data stream으로 로그를 수집하면 뒤에서 설명할 firehose 뿐만 아
 
 # Shard
 
-Data stream은 최소 1개, 최대 200개의 shard로 구성됩니다. shard의 갯수가 늘어날수록 소화할 수 있는 데이터의 양은 커지고, 그만큼 비용도 증가합니다. 
+Data stream은 최소 1개, 최대 200개의 shard로 구성됩니다. shard의 갯수가 늘어날수록 소화할 수 있는 데이터의 양은 커지고, 그만큼 비용도 증가합니다. kafka의 partiton과 유사합니다.
 
 ![image](https://user-images.githubusercontent.com/52685258/127923232-2448ce4d-f35b-4d94-b280-6bb2ef4fb919.png)
 
@@ -38,13 +38,13 @@ Data stream은 최소 1개, 최대 200개의 shard로 구성됩니다. shard의 
 - ingest : 1mb / 1000 record
 - Consume : 2mb / 5TPS
 
-shard의 비용은 시간당 0.015달러이기 입니다. 24시간에 0.36달러면 그리 비싼 금액은 아니지만 지역별로 요금 차이가 있고 사용 환경마다 최적의 shard 갯수는 다르기 때문에 AWS에서 제시하고 있는 quota를 확인하시기 바랍니다.
+shard의 비용은 시간당 0.015달러입니다. 24시간에 0.36달러면 그리 비싼 금액은 아니지만 지역별로 요금 차이가 있고 사용 환경마다 최적의 shard 갯수는 다르기 때문에 AWS에서 제시하고 있는 quota를 확인하시기 바랍니다.
 
 https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html
 
 
 
-안타깝게도 shard는 자체 오토 스케일링을 지원하지 않습니다. 이를 위해서는 추가 API 개발이 필요합니다. 자세한 사항은 이 포스트에 정리되어 있습니다.
+shard는 자체 오토 스케일링을 지원하지 않습니다. 이를 위해서는 추가 API 개발이 필요합니다. 자세한 사항은 이 포스트에 정리되어 있습니다.
 
 https://medium.com/slalom-data-analytics/amazon-kinesis-data-streams-auto-scaling-the-number-of-shards-105dc967bed5
 
