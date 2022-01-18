@@ -2,8 +2,8 @@
 title: "[Data Enginnering] ETL의 데이터 소스가 RDB일 때, 멱등성은?"
 date: 2021-01-16 00:00:00
 categories:
-  - Data
-tags: [DataEnginnering, airflow]
+- data
+tags: [data-engineering, airflow]
 ---
 
 대부분 파일로 저장하는 데이터들은 그 원본이 바뀌는 일은 많지 않습니다. 일자별로 파티션을 나누거나 적재된 시간을 기준으로 데이터를 ETL하면 원본이 변경되지 않는 한 동일한 결과를 도출할 것입니다.
