@@ -2,7 +2,7 @@
 title: "[Spark] repartition 속도 > coleasce 속도? "
 date: 2021-01-18 00:00:00
 categories:
-  - spark
+- spark
 tags: [spark, Data-enginnering]
 ---
 
@@ -24,7 +24,9 @@ tags: [spark, Data-enginnering]
 
 # 테스트 환경
 
-동일한 Job을 EMR 클러스터에서 실행시키고, 파티션 병합 메서드를 다르게 주어 spark ui에서 어떤 것이 다른지 확인합니다.
+동일한 Job을 EMR 클러스터에서 실행시키고, 파티션 병합 메서드를 다르게 주어 spark ui에서 어떤 것이 다른지 확인합니다. (Glue에서는 spark ui 하기가 너무 번거로워서 부득이하게 EMR을 사용합니다.ㅠㅠ)
+
+
 
 
 

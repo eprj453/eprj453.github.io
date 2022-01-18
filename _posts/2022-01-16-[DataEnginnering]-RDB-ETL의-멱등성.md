@@ -1,6 +1,6 @@
 ---
 title: "[Data Enginnering] ETL의 데이터 소스가 RDB일 때, 멱등성은?"
-date: 2021-01-16 00:00:00
+date: 2022-01-16 00:00:00
 categories:
 - data
 tags: [data-engineering, airflow]
