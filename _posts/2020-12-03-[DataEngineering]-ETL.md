@@ -2,7 +2,7 @@
 title: "[Data Engineering] ETL"
 date: 2020-12-03 00:00:00
 categories:
-- data-engineering
+- data
 tags: [data-engineering]
 ---
 
