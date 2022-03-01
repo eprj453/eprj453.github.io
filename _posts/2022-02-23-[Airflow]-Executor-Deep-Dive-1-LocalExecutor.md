@@ -34,7 +34,7 @@ Executor는 Scheduler가 Task 실행방식을 결정하기 위한 것이기 때�
 
 그럼 코드를 직접 까서 이게 사실인지 확인해보겠습니다.
 
-
+<br/>
 
 # Code
 
@@ -65,7 +65,7 @@ https://github.com/apache/airflow/blob/main/airflow/executors/local_executor.py
 
 정도를 생각해볼 수 있겠습니다.
 
-
+<br/>
 
 ## UnLimitedParallelism / LimitedParallelism
 
