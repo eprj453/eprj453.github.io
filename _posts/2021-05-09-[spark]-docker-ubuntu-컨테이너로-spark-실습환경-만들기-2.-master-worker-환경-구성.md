@@ -37,7 +37,7 @@ root@master# ssh-keygen -t rsa
 생략
 ...
 ```
-이그럼 이제 worker 컨테이너에 key를 등록하겠습니다.
+그럼 이제 worker 컨테이너에 key를 등록하겠습니다.
 ```shell
 docker exec -it spark-worker bash
 
