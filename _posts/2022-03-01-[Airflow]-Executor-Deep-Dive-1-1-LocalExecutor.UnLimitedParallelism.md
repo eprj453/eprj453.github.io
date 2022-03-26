@@ -272,7 +272,7 @@ LocalWorkerBase의 run이 실행되면, super().run()에 의해 BaseProcess.run(
 
 
 
-execute_work()와 그 내부 메서드만 보면 result_queue와 OS 단계에서 프로세스를 생성하는 코드도 있습니다. 이 부분만 보면 LocalExecutor 내부는 한 번 훝은게 아닌가 생각합니다.
+execute_work()와 그 내부 메서드만 보면 result_queue와 OS 단계에서 프로세스를 생성하는 코드도 있습니다. 이 부분만 보면 LocalExecutor 내부는 다 본것 같습니다.
 
 그런데 쓰다보니 너무 길어져서, LocalExecutor는 다음 포스팅에서 마무리하도록 하겠습니다.
 
