@@ -63,7 +63,7 @@ https://github.com/apache/airflow/commit/4839a5bc6ed7af7d0f836360e4ea3c6fd421e0f
 > on average.
 > ```
 
-기본 설정값은 False입니다.  `subprocess.check_call()` 은 새로운 python process를 생성하는데, 그것보다 현재 프로세스를 복제해 바로 자식 프로세스로 내려보내는 fork()를 기본적으로 사용하자는 것이 committer의 요지입니다. 
+기본 설정값은 False입니다.  `subprocess.check_call()` 은 새로운 python process를 생성하는데, 그것보다 현재 프로세스를 복제해 바로 자식 프로세스로 내려보내는 fork()를 기본적으로 사용해 프로세스 로딩 시간을 줄이자는게 committer의 요지입니다. 
 
 result_queue에 해당 task instance의 key와 command를 넣어줌으로써 해당 프로세스가 관리하는 task를 추가합니다.
 
