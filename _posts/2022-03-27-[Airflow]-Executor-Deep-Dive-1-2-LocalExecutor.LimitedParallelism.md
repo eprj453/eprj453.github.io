@@ -1,5 +1,5 @@
 ---
-title: "[Airflow] Executor Deep Dive 1-1. LocalExecutor.UnLimitedParallelism"
+title: "[Airflow] Executor Deep Dive 1-2. LocalExecutor.LimitedParallelism"
 date: 2022-03-27 00:00:00
 categories:
 - airflow
