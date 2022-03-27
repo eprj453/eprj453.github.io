@@ -41,9 +41,18 @@ def execute_work(self, key: TaskInstanceKey, command: CommandType) -> None:
 
 ```
 
-EXECUTE_TASKS_NEW_PYTHON_INTERPRETER 라는 설정값에 따라 자식 프로세스를 만드는 모듈이 subprocess / os로 구분됩니다. airflow 2.0 버전에서 추가된 설정사항입니다.
+EXECUTE_TASKS_NEW_PYTHON_INTERPRETER 라는 설정값에 따라 자식 프로세스를 만드는 모듈이 subprocess / os로 구분됩니다. 정확히는
 
-https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#execute-tasks-new-python-interpreter
+-  _execute_work_in_subprocess() -> subprocess.check_call()
+- _execute_work_in_fork -> os.fork()
+
+메서드를 사용해 프로세스를 생성합니다.
+
+
+
+기존 1 버전에서는 subprocess만 사용했었는데, os.fork()가 airflow 2.0 버전에서 추가되었습니다.
+
+[https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#execute-tasks-new-python-interpreter](https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#execute-tasks-new-python-interpreter)
 
 > Should tasks be executed via forking of the parent process (“False”, the speedier option) or by spawning a new python process (“True” slow, but means plugin changes picked up by tasks straight away)
 
@@ -51,7 +60,7 @@ https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#ex
 
 1 버전에 없던 os.fork()가 추가된 이유는 다음과 같습니다.
 
-https://github.com/apache/airflow/commit/4839a5bc6ed7af7d0f836360e4ea3c6fd421e0fa
+[https://github.com/apache/airflow/commit/4839a5bc6ed7af7d0f836360e4ea3c6fd421e0fa](https://github.com/apache/airflow/commit/4839a5bc6ed7af7d0f836360e4ea3c6fd421e0fa)
 
 > ```
 > Spawning a whole new python process and then re-loading all of Airflow
@@ -63,13 +72,15 @@ https://github.com/apache/airflow/commit/4839a5bc6ed7af7d0f836360e4ea3c6fd421e0f
 > on average.
 > ```
 
-기본 설정값은 False입니다.  `subprocess.check_call()` 은 새로운 python process를 생성하는데, 그것보다 현재 프로세스를 복제해 바로 자식 프로세스로 내려보내는 fork()를 기본적으로 사용해 프로세스 로딩 시간을 줄이자는게 committer의 요지입니다. 
+기본 설정값은 False입니다.  `subprocess.check_call()` 은 완전히 새로운 프로세스를 생성하는데, 그것보다 현재 프로세스를 복제해 바로 자식 프로세스로 내려보내는 fork()를 기본적으로 사용해 프로세스 로딩 시간을 줄이자는게 committer의 요지입니다.
+
+
 
 result_queue에 해당 task instance의 key와 command를 넣어줌으로써 해당 프로세스가 관리하는 task를 추가합니다.
 
 
 
-이제 UnlimitedParallelism 클래스는 한바퀴 훑었습니다. LimitedParallelism 클래스를 보겠습니다.
+휴... 이제 UnlimitedParallelism 클래스는 한바퀴 훑었습니다. LimitedParallelism 클래스를 보겠습니다.
 
 <br/>
 
