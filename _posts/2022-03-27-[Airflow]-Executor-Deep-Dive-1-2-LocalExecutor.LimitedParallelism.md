@@ -1,6 +1,6 @@
 ---
 title: "[Airflow] Executor Deep Dive 1-2. LocalExecutor.LimitedParallelism"
-date: 2022-03-27 00:00:00
+date: 2022-03-26 00:00:00
 categories:
 - airflow
 tags: [airflow]
