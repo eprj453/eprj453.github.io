@@ -37,7 +37,7 @@ airflow 빌드에는 에러가 발생하지 않습니다. DAG를 실행시켜도
 
 Commiter의 피드백을 받아 총 2번의 커밋을 했고 제 소스가 main 브랜치에 병합됐습니다. 
 
-https://github.com/apache/airflow/pull/22711
+[https://github.com/apache/airflow/pull/22711](https://github.com/apache/airflow/pull/22711)
 
 그래도 ETL 업계에서 공룡 프레임워크인 Airflow에 두 줄이라도 기여했다는 뿌듯함, 전 세계인이 사용하는 오픈소스에 컨트리뷰터라는 자신감도 생겨서 기분이 좋습니다.
 
