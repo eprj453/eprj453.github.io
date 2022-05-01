@@ -306,9 +306,9 @@ def run(self):
 
 찾았습니다. 생각보다 긴 시간을 헤메다 발견했는데, 위의 아키텍처 그림을 꽤 많이 봤었음에도 Webserver에서 DB로 화살표를 보내고 있는걸 단번에 생각해내지 못했습니다. 역시 머리가 나쁘면 몸이 고생합니다.
 
-airflow의 Web은 flask로 구현되어 있습니다. flask app에서 HTTP request를 받으면 executor에서 queue_task_instance를 하도록 실행하고 heartbeat 확인까지 이 곳에서 담당하고 있는 것을 볼 수 있습니다.
+airflow의 Web은 flask로 구현되어 있습니다. flask app에서 HTTP request를 받으면 -> executor에서 queue_task_instance 실행 -> heartbeat 확인까지 이 곳에서 담당하고 있는 것을 볼 수 있습니다.
 
 <br/>
 
-원래 CeleryExecutor는 포스팅 하나에 전부 담으려고 했는데, 이 역시 쓰다보니 투머치토킹이 되어버려서 2장으로 나누도록 하겠습니다. 이후에는 실제로 task를 실행시키는 단계와 상태 변경 정도가 남아있는데, 코드는 길지는 설명이 길지 않아 나머지 1장에 전부 담아낼 수 있을것 같습니다.
+원래 CeleryExecutor는 포스팅 하나에 전부 담으려고 했는데, 이 역시 쓰다보니 투머치토킹이 되어버려서 2장으로 나누도록 하겠습니다. 이후에는 실제로 task를 실행시키는 단계와 상태 변경 정도가 남아있는데, 코드는 길지만 설명이 길지 않아 나머지 1장에 전부 담아낼 수 있을것 같습니다.
 
