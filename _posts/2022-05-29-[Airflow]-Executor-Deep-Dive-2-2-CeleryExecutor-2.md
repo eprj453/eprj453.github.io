@@ -12,7 +12,7 @@ tags: [airflow]
 # class CeleryExecutor.trigger_tasks()
 
 ```python
-def trigger_tasks(self, open_slots: int) -> None:
+Cdef trigger_tasks(self, open_slots: int) -> None:
     """
     Overwrite trigger_tasks function from BaseExecutor
 
