@@ -118,9 +118,7 @@ product_df.write.parquet(f"s3://...")
 
 동일한 로직에서 병합 메서드에 따른 시간 차이는 다음과 같습니다.
 
-![image-20220818005019425](/Users/psw/Library/Application Support/typora-user-images/image-20220818005019425.png)
-
-<img width="1092" alt="image" src="https://user-images.githubusercontent.com/52685258/184083927-121ee684-72ce-4417-8623-d6ca58c1a529.png">
+![image-20220818005019425](https://user-images.githubusercontent.com/52685258/184083927-121ee684-72ce-4417-8623-d6ca58c1a529.png)
 
 
 
@@ -177,8 +175,8 @@ executor 간에 파티션을 재정렬하기 위해 모든 executor가 컴퓨팅
 ## coalesce
 
 coalesce로 파티션을 병합한 경우입니다.
+![image](https://user-images.githubusercontent.com/52685258/192481549-e67bf4c9-eecf-432e-abb9-561549a98543.png)
 
-![image-20220831004524816](/Users/psw/Library/Application Support/typora-user-images/image-20220831004524816.png)
 
 
 
