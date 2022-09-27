@@ -9,6 +9,6 @@ type: about
 
 비전공자의 개발자 생활, SSAFY 등등 궁금한 점은 링크드인 DM 주세요 :)
 
-[개인 공부기록 notion](https://www.notion.so/46ceac94cb3f4a4f9fda65958088c40d)
+[개인 공부기록 notion](https://glitter-teal-f9a.notion.site/008939b400e344c6b1af4aad8fc5356b)
 
-[링크드인](https://www.linkedin.com/in/%EC%83%81%EC%9B%90-%EB%B0%95-347628193/)
+[링크드인](https://www.linkedin.com/in/sangwon-park-347628193/)
