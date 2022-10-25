@@ -2,7 +2,7 @@
 title: "[Airflow] MWAA Stuck in queue"
 date: 2022-10-25 00:00:00
 categories:
-- Airflow
+- airflow
 tags: [airflow, aws]
 ---
 
