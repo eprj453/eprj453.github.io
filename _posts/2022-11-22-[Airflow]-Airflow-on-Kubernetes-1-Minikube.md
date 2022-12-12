@@ -19,7 +19,7 @@ tags: [airflow, aws, kubernetes]
 
 이에 직접 개발한 airflow의 필요성을 다시 느꼈고, 이전에 사내 물리 서버에서 사용했던 Docker + CeleryExecutor 조합으로 배포하려고 했으나, 이 또한사용하면서 문제점을 느꼈던 조합입니다.
 
-- Queue에 많은 task가 몰릴 때, scale-up으로 다수의 worker를 구성해 소화시킬 수 있는가?
+- Queue에 많은 task가 몰릴 때, scale-in으로 다수의 worker를 구성해 소화시킬 수 있는가?
   - 몇백개의 task가 순식간에 몰리는 순간에 task switch가 상당히 느려졌던 경험이 있음. worker 스케일을 유연하게 관리하는 데에는 한계가 있었음.
 - 문제가 생겨 worker가 죽는다면, 거기에 subprocess로 물려있던 task들은?
   - SPOF를 해결해줄 수 없는 태생적 한계
