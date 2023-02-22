@@ -1,6 +1,6 @@
 ---
 title: "[Airflow] 큰 DAG 분리하기 1. 코드 분리"
-date: 2022-02-22 00:00:00
+date: 2023-02-22 00:00:00
 categories:
 - airflow
 tags: [airflow]
