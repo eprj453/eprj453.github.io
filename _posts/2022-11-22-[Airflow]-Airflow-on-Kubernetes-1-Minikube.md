@@ -33,7 +33,7 @@ tags: [airflow, aws, kubernetes]
 
 
 
-현재는 회사에 DE 인력이 거의 없어 혼자서 이를 개발 + 배포 + 운영하기는 어렵겠지만, managed airflow의 한계가 생각보다 빠르게 다가오고 있는 것을 느끼고 있고 그 때 대비하려고 하면 너무 늦을것 같다는 생각이 들어 미리 준비하는 차원에서 airflow on kubernetes + kubernetesExecutor 조합의 직접 개발 + 배포를 준비하고 있습니다. 
+현재는 회사에 DE 인력이 거의 없어 혼자서 이를 개발 + 배포 + 운영하기는 어렵겠지만, managed airflow의 한계가 생각보다 빠르게 다가오고 있는 것을 느끼고 있고 그 때 대비하려고 하면 너무 늦을것 같다는 생각이 들어 미리 준비하는 차원에서 airflow on kubernetes + kubernetesExecutor 조합으로 Airflow를 어떻게 사용할 수 있는지 실습해보려고 합니다.
 
 물론 쿠버네티스가 만능은 아닙니다. 러닝 커브가 상당한만큼 쿠버네티스를 이해하지 못해 정작 필요한 airflow가 버벅거리는 주객전도의 상황이 펼쳐질 가능성 또한 높습니다.
 
@@ -152,15 +152,6 @@ kubectl port-forward svc/${AIRFLOW_NAME}-web 7070:8080 --namespace $AIRFLOW_NAME
 <br/>
 
 # Next
-
-이대로는 당연히 상용에서 사용할 수 없습니다. 당장 생각나는 것만 해도
-
-- replica는 어떻게 운영할 것인가?
-- 소스, 배포 관리를 어떻게 할 것인가?
-- 외부 저장소는 어떻게 할 것인가?
-- 보안은 어떤 식으로 구성할 것인가?
-
-정도입니다.
 
 eks에 배포하기 앞서 필요한 리소스들을 살펴보고, helm chart를 구성해보도록 하겠습니다. 
 
