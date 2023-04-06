@@ -1,5 +1,5 @@
 ---
-title: "[Airflow] Airflow의 하루"
+title: "[Airflow] Airflow의 하루(Airflow DAG 시간 지정하기)"
 date: 2023-04-02 00:00:00
 categories:
 - airflow
@@ -65,13 +65,13 @@ Airflow 2버전에 들어오면서 생긴 개념이 `data_interval_start`와 `da
 
 - 언제 도는지가 중요한 DAG인가
 - catchup을 True로 둘 것인가 False로 둘 것인가
-- 현재 기준 돌아야 하는 data_interval_start와 data_interval_end가 언제인지 알 수 있는가
+- 내가 이 DAG을 언제부터 실행시키고 싶은가
 
 <br/>
 
 ## 언제 도는지가 중요한 DAG인가
 
-언제 도는지가 중요하지 않은 DAG이라기보단, 과거 데이터를 소급해야 하거나 BackFill이 필요하지 않는 DAG이 있을 수 있습니다. 예를 들면, 저는 매일 9시 30분에 팀원들이 돌아가면서 아침 커피를 사는데 이 알람에서 어제가 언제고 오늘이 언제인지는 크게 중요하지 않습니다. 그저 정해진 시간에 해당 인덱스에 걸려있는 팀원만 알려주면 되기 때문에, 이런 DAG에서는 시간 세팅이 크게 중요하진 않습니다.
+언제 도는지가 중요하지 않은 DAG이라기보단, 과거 데이터를 소급해야 하거나 BackFill이 필요하지 않는 DAG이 있을 수 있습니다. 예를 들면, 저는 매일 9시 30분에 팀원들끼리 돌아가면서 정하는 아침 커피 당번을 알려주는 알람을 airflow에 올려놓고 사용하고 있습니다. 이 알람에서 어제가 언제고 오늘이 언제인지는 크게 중요하지 않습니다. 그저 정해진 시간에 해당 인덱스에 걸려있는 팀원만 알려주면 되기 때문에, 이런 DAG에서는 시간 세팅이 크게 중요하진 않습니다.
 
 <br/>
 
@@ -85,7 +85,7 @@ Airflow 2버전에 들어오면서 생긴 개념이 `data_interval_start`와 `da
 >
 > - [Airflow Docs - catchup](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#catchup)
 
-catchup을 False로 두면 해당 DAG의 `어제`를 기준으로 해당 DAG이 하나 실행되고, 이후 예정된 시간에 DAG이 동작합니다. 이전 과거를 소급해 Backfill로 동작하거나 미래를 기다리지 않습니다. 
+catchup을 False로 두면 해당 DAG의 `어제`를 기준으로 해당 DAG이 하나 실행되고, 이후 예정된 시간에 DAG이 동작합니다. 이전 과거를 소급해 Backfill로 동작하거나 미래를 기다리지 않습니다. 아래와 같이 DAG 세팅을 해보겠습니다.
 
 ```python
 from datetime import datetime
@@ -93,7 +93,7 @@ from airflow.decorators import dag, task
 
 @dag(
 	schedule_interval="0 9 * * *",
-	start_date=datetime(2023, 5, 2, 9, 0),
+	start_date=datetime(2023, 4, 2, 9, 0),
 	catchup=False,
 	tags=['parksw2', 'test'])
 def CATCHUP_TEST():
@@ -111,4 +111,95 @@ def CATCHUP_TEST():
 CATCHUP_TEST_DAG = CATCHUP_TEST()
 ```
 
-오늘은 2023년 4월 2일입니다. 매일 9시에 도는 DAG의 start_date를 5월 2일로 잡아두고 catchup을 False로 주면 
+이 DAG을 실행시키는 시간은 2023년 4월 5일입니다. 매일 9시에 도는 DAG의 start_date를 4월 2일로 잡아두었으니, catchup을 생각하지 않는다면 data_interval_start가 4월 2일인 DAG부터 돌아야 할 것 같이 생겼습니다.
+
+<img width="489" alt="image" src="https://user-images.githubusercontent.com/52685258/230120655-fecd0393-67ad-429b-9af5-98ba82b2eb5a.png">
+
+그러나 실제로는 start_date를 4월 4일로 두는 DAG 인스턴스 하나가 실행되었습니다. schedule_interval을 매일 9시로 지정했으니 이 DAG의 어제는 24시간 전이고, 4월 5일의 24시간 전인 4월 4일을 start_date로 두는 DAG 인스턴스 하나가 실행된 것입니다. 내일(4월 6일) 오전 9시에는에는 4월 5일을 data_interval_start로 두는 DAG이 실행될 것입니다.
+
+<br/>
+
+catchup을 True로 바꿔보겠습니다.
+
+<img width="498" alt="image" src="https://user-images.githubusercontent.com/52685258/230122302-122b8adf-0c9b-4ea6-8f7a-e080e04f9d4f.png">
+
+start_date가 4월 2일인 DAG부터 차례대로 실행되어 4월 4일인 DAG까지 실행되었습니다. Backfill의 개념을 알고 계시다면 어렵지 않게 이해하실 수 있겠습니다만, catchup을 True로 설정하고 start_date를 과거로 지정했다면 과거의 시간까지 모두 실행시킨다는 것을 알 수 있습니다.
+
+여기서 중요한 점은 start_date는  `DAG이 이 날부터 돌았으면 좋겠다`하는 날짜가 아니라 `내가 DAG이 이 날부터 돌았으면 좋겠다하는 날짜의 어제` 를 지정해야 한다는 점입니다. 여기서 어제는 인간의 어제가 아니라 airflow의 어제입니다.
+
+<br/>
+
+이해를 돕기 위해 스케줄을 조금 바꿔보겠습니다.
+
+```python
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	schedule_interval="0 9 * * MON",
+	start_date=datetime(2023, 4, 5, 9, 0),
+	catchup=False,
+	tags=['parksw2', 'test'])
+def CATCHUP_TEST():
+	@task
+	def start():
+		print("hello start!")
+
+	@task
+	def end():
+		print("hello end!")
+
+	start() >> end()
+
+
+CATCHUP_TEST_DAG = CATCHUP_TEST()
+```
+
+매주 월요일 오전 9시에 도는 DAG의 start_date를 2023년 4월 5일로 잡아놨습니다. 4월 5일은 수요일입니다. 이 DAG의 catchup을 False로 잡았을 때, 이 DAG은 어떻게 실행될까요?
+
+<img width="459" alt="image" src="https://user-images.githubusercontent.com/52685258/230125054-a539cb28-dbc2-41ee-9d8e-f56b2338e873.png">
+
+아무런 실행도 일어나지 않습니다. 왜일까요?
+
+이 DAG의 start_date를 수요일로 지정했습니다. 4월 5일 수요일을 기준으로 가장 직전의 월요일은 4월 3일입니다. 이 DAG의 하루는 1주일, 그것도 월요일만이 존재하는 1주일입니다. 4월 3일, 4월 10일, 4월 17일... 이 DAG의 세상에서는 월요일만 존재해야 합니다. 그렇다면 이 DAG이 data_interval_start로 잡을 수 있는 날짜는 4월 10일이고, data_interval_end는 4월 17일이기 때문에 최초 실행은 4월 17일이어야 맞습니다.
+
+그러나 catchup을 False로 주면 상황이 조금 달라집니다. 이 DAG의 data_interval_start를 start_date로 바로 잡아버리고, 바로 다가오는 내일, 여기서는 4월 10일을 data_interval_end로 DAG이 실행됩니다. 여기서는 data_interval_start -> 4월 5일, data_interval_end -> 4월 10일이 될 것입니다. DAG의 실행 또한 4월 17일이 아닌 4월 10일이 될 것입니다.
+
+jinja template 등으로 data_interval_start를 인자로 넘기거나 할 때, 이 부분을 특히 조심해야 합니다.
+
+
+
+<br/>
+
+혹시, catchup을 True로 준다면 어떨까요?
+
+<img width="537" alt="image" src="https://user-images.githubusercontent.com/52685258/230130453-d869a8e7-fec7-4c32-80de-9a6bc6826f4f.png">
+
+catchup이 True이든 False이든 start_date 이전의 날짜는 임의로 backfill을 실행시키지 않는 이상 실행되지 않습니다. catchup을 True로 준다고 하더라도 start_date 이전의 스케줄링은 실행되지 않습니다.
+
+이 DAG의 세상에서는 start_date 4월 5일은 없는 날짜를 지정한 것이나 다름없기 때문에 지정할 수 있는 날짜가 생길때까지 기다립니다. start_date를 4월 5일로 지정했지만 그 다음 월요일인 4월 10일을 지정한 것과 다르지 않게 됩니다.
+
+이 DAG은 4월 10일을 data_interval_start로 잡고 4월 17일을 data_interval_end로 잡는 DAG이 최초로 실행되고, 실행일은 4월 17일입니다.
+
+<br/>
+
+보셔서 아시겠지만, `0 9 * * MON`으로 스케줄을 지정한 DAG의 start_date를 수요일로 지정하면 그 범위가 헷갈립니다. 예시에서는 1주일을 기준으로 보여드렸지만, 시간마다 도는 DAG의 start_date에 분 단위까지 지정한다거나 하는 경우도 이렇게 없는 세계의 시간을 끌어다 쓰게 되는 DAG 구성입니다. 그렇기 때문에 schedule_interval과 start_date는 그 간격을 일치시켜 지정해주는 것이 좋습니다.
+
+<br/>
+
+## 내가 이 DAG을 언제부터 실행시키고 싶은가
+
+정리하자면
+
+- start_date 이전의 스케줄은 backfill을 하지 않는 이상 일어나지 않는다.
+- schedule_interval과 start_date의 시간대는 일치시켜주는 것이 좋다.
+- catchup=False라면 
+  - start_date를 기준으로 가장 먼저 도래할 내일을 data_interval_end로 두는 DAG이 최초로 실행된다. 이 때 data_interval_start가 매번 다를수 있음에 주의한다.
+- catchup=True라면
+  - start_date의 시간에서 가장 먼저 만나게 될 `Airflow의 내일`을 data_interval_start로 잡는 DAG이 가장 먼저 수행된다.
+
+<br/>
+
+# 결론
+
+최대한 풀어서 설명을 하고 싶었는데, 여전히 어렵다는 생각이 듭니다. DAG을 세팅할 때 항상 시작이 언제일지, 어떻게 돌지 유념하며 올려야겠습니다.
