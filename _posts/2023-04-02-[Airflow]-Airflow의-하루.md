@@ -163,7 +163,7 @@ CATCHUP_TEST_DAG = CATCHUP_TEST()
 
 이 DAG의 start_date를 수요일로 지정했습니다. 4월 5일 수요일을 기준으로 가장 직전의 월요일은 4월 3일입니다. 이 DAG의 하루는 1주일, 그것도 월요일만이 존재하는 1주일입니다. 4월 3일, 4월 10일, 4월 17일... 이 DAG의 세상에서는 월요일만 존재해야 합니다. 그렇다면 이 DAG이 data_interval_start로 잡을 수 있는 날짜는 4월 10일이고, data_interval_end는 4월 17일이기 때문에 최초 실행은 4월 17일이어야 맞습니다.
 
-그러나 catchup을 False로 주면 상황이 조금 달라집니다. 이 DAG의 data_interval_start를 start_date로 바로 잡아버리고, 바로 다가오는 내일, 여기서는 4월 10일을 data_interval_end로 DAG이 실행됩니다. 여기서는 data_interval_start -> 4월 5일, data_interval_end -> 4월 10일이 될 것입니다. DAG의 실행 또한 4월 17일이 아닌 4월 10일이 될 것입니다.
+그러나 catchup을 False로 주면 상황이 조금 달라집니다. 이 DAG의 data_interval_start를 start_date로 바로 잡아버립니다. 이 DAG의 세상에서는 존재하지 않는 수요일이라는 날이 data_interval_start로 잡히게 되는 것이죠. 바로 다가오는 airflow의 내일, 여기서는 4월 10일을 data_interval_end로 DAG이 실행됩니다. 여기서는 data_interval_start -> 4월 5일, data_interval_end -> 4월 10일이 될 것입니다. DAG의 실행 또한 4월 17일이 아닌 4월 10일이 될 것입니다.
 
 jinja template 등으로 data_interval_start를 인자로 넘기거나 할 때, 이 부분을 특히 조심해야 합니다.
 
@@ -203,4 +203,87 @@ catchup이 True이든 False이든 start_date 이전의 날짜는 임의로 backf
 
 # 결론
 
-최대한 풀어서 설명을 하고 싶었는데, 여전히 어렵다는 생각이 듭니다. DAG을 세팅할 때 항상 시작이 언제일지, 어떻게 돌지 유념하며 올려야겠습니다.
+2가지를 기억하면 좋을 것 같습니다. 물론 DAG을 구성하는 사용자마다 원하는 시간개념이 다르기 때문에 주관적인 의견입니다.
+
+1. catchup=True를 쓰자
+
+위에서도 언급했지만, catchup=False를 쓰면 DAG의 시간에서는 없어야 할 날이 data_interval_start로 잡히는 경우가 생깁니다. 그렇기 때문에 catchup은 True로 잡는 것이 혼란을 줄일 수 있습니다.
+
+<br/>
+
+2. 내가 DAG을 최초로 실행시키고자 하는 실제 날짜를 기준으로, `airflow의 어제`를 start_date로 등록하자.
+
+4월 5일 수요일에 매주 월요일 오전 9시에 도는 DAG을 세팅한다고 해보겠습니다. 원하는 최초 개시일은 4월 10일 월요일입니다. 그렇다면 4월 10일 오전 9시를 기준으로 `airflow의 어제`는 언제일까요?
+
+4월 3일 오전 9시입니다. 이 날짜를 start_date로 두고 schedule_interval을 `0 9 * * MON`로 두면
+
+- data_interval_start : 4월 3일 오전 9시
+- data_interval_end : 4월 10일 오전 9시
+
+로 DAG이 세팅됩니다. 
+
+```python
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	schedule_interval="0 9 * * MON",
+	start_date=datetime(2023, 4, 3, 9, 0),
+	catchup=True,
+	tags=['parksw2', 'test'])
+def CATCHUP_TEST():
+	@task
+	def start():
+		print("hello start!")
+
+	@task
+	def end():
+		print("hello end!")
+
+	start() >> end()
+
+
+CATCHUP_TEST_DAG = CATCHUP_TEST()
+```
+
+task 내부에서 data_interval_start을 쓰든 data_interval_end를 쓰든 헷갈릴 일이 없는 DAG입니다.
+
+<br/>
+
+매일 실행되는 DAG도 다르지 않습니다. 4월 5일 수요일 오후 6시에 매일 오전 10시에 도는 DAG을 세팅하고 싶다고 해보겠습니다. 이 DAG의 최초 개시일은 4월 6일 10시가 되어야 하고, 4월 6일 10시의 `airflow의 어제`는 4월 5일 오전 10시입니다.
+
+```python
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	schedule_interval="0 10 * * *",
+	start_date=datetime(2023, 4, 5, 10, 0),
+	catchup=True,
+	tags=['parksw2', 'test'])
+def CATCHUP_TEST():
+	@task
+	def start():
+		print("hello start!")
+
+	@task
+	def end():
+		print("hello end!")
+
+	start() >> end()
+
+
+CATCHUP_TEST_DAG = CATCHUP_TEST()
+```
+
+이 DAG의 최초 개시는 4월 6일 오전 10시이고,
+
+- data_interval_start : 4월 5일 오전 10시
+- data_interval_end : 4월 6일 오전 10시
+
+로 DAG이 세팅될 것입니다.
+
+<br/>
+
+airflow의 시간 개념에 대해 간당명료하게 설명하고 싶었는데, 쓰다보니 산문처럼 길어졌습니다. 그래도 airflow의 시간 개념을 헷갈려하시는 분들께 조금이나마 도움이 되었으면 좋겠습니다.
+
