@@ -85,7 +85,7 @@ Airflow 2버전에 들어오면서 생긴 개념이 `data_interval_start`와 `da
 >
 > - [Airflow Docs - catchup](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#catchup)
 
-catchup을 False로 두면 해당 DAG의 `어제`를 기준으로 해당 DAG이 하나 실행되고, 이후 예정된 시간에 DAG이 동작합니다. 이전 과거를 소급해 Backfill로 동작하거나 미래를 기다리지 않습니다. 아래와 같이 DAG 세팅을 해보겠습니다.
+catchup을 False로 두면 해당 DAG의 `어제`를 기준으로 해당 DAG이 하나 실행되고, 이후 예정된 시간에 DAG이 동작합니다. 이전 과거를 소급해 Backfill로 동작하지 않습니다. 아래와 같이 DAG 세팅을 해보겠습니다.
 
 ```python
 from datetime import datetime
@@ -161,11 +161,13 @@ CATCHUP_TEST_DAG = CATCHUP_TEST()
 
 아무런 실행도 일어나지 않습니다. 왜일까요?
 
-이 DAG의 start_date를 수요일로 지정했습니다. 4월 5일 수요일을 기준으로 가장 직전의 월요일은 4월 3일입니다. 이 DAG의 하루는 1주일, 그것도 월요일만이 존재하는 1주일입니다. 4월 3일, 4월 10일, 4월 17일... 이 DAG의 세상에서는 월요일만 존재해야 합니다. 그렇다면 이 DAG이 data_interval_start로 잡을 수 있는 날짜는 4월 10일이고, data_interval_end는 4월 17일이기 때문에 최초 실행은 4월 17일이어야 맞습니다.
+이 DAG의 start_date를 수요일로 지정했습니다. 4월 5일 수요일을 기준으로 가장 직전의 월요일은 4월 3일입니다. 이 DAG의 하루는 1주일, 그것도 월요일만이 존재하는 1주일입니다. 4월 3일, 4월 10일, 4월 17일... 이 DAG의 세상에서는 월요일만 존재해야 합니다. 
+
+저는 이 DAG을 4월 5일에 세팅했습니다. start_date를 4월 5일로 잡은 상황에서 4월 3일은 볼 수 없는 날짜입니다. 그렇다면 이 DAG이 data_interval_start로 잡을 수 있는 날짜는 4월 10일이고, data_interval_end는 4월 17일이기 때문에 최초 실행은 4월 17일이어야 맞습니다.
 
 그러나 catchup을 False로 주면 상황이 조금 달라집니다. 이 DAG의 data_interval_start를 start_date로 바로 잡아버립니다. 이 DAG의 세상에서는 존재하지 않는 수요일이라는 날이 data_interval_start로 잡히게 되는 것이죠. 바로 다가오는 airflow의 내일, 여기서는 4월 10일을 data_interval_end로 DAG이 실행됩니다. 여기서는 data_interval_start -> 4월 5일, data_interval_end -> 4월 10일이 될 것입니다. DAG의 실행 또한 4월 17일이 아닌 4월 10일이 될 것입니다.
 
-jinja template 등으로 data_interval_start를 인자로 넘기거나 할 때, 이 부분을 특히 조심해야 합니다.
+jinja template 등으로 data_interval_start를 인자로 넘기거나 해서 파라미터로 날짜를 사용하고자 할 때, 이 부분을 특히 조심해야 합니다.
 
 
 
