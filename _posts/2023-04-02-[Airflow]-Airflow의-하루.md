@@ -194,7 +194,7 @@ catchup이 True이든 False이든 start_date 이전의 날짜는 임의로 backf
 - start_date 이전의 스케줄은 backfill을 하지 않는 이상 일어나지 않는다.
 - schedule_interval과 start_date의 시간대는 일치시켜주는 것이 좋다.
 - catchup=False라면 
-  - start_date를 기준으로 가장 먼저 도래할 `Airflow의 내일`을 data_interval_end로 두는 DAG이 최초로 실행된다. 이 때 data_interval_start가 매번 다를수 있음에 주의한다.
+  - start_date 기준으로 data_interval_start로 두는 DAG이 최초로 실행된다. data_interval_end는 `Airflow 기준의 내일`이 되고, 이 때 data_interval_start가 매번 다를수 있음에 주의한다.
 - catchup=True라면
   - start_date를 기준으로 가장 먼저 도래할 `Airflow의 날짜`를 data_interval_start로 잡는 DAG이 가장 먼저 수행된다.
   - start_date가 과거라면 과거부터 현재까지 DAG이 모두 실행된 된다
