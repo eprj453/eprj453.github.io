@@ -93,7 +93,7 @@ Table B의 count : 약 2천만건
 
 위 2개 테이블을 조인하는 가상의 job을 예시로 들고, 물리적으로 job을 분리하면 이런 그림이 됩니다.
 
-![](../images/442829197-34e3af43-ab74-4748-93f8-9b7fdb75611c.png)
+![](https://eprj453.github.io/images/442829197-34e3af43-ab74-4748-93f8-9b7fdb75611c.png)
 
 
 

@@ -40,7 +40,7 @@ spark stage에서 특정 몇 개의 파티션의 작업이 계속 끝나지 않�
 
 driven dataframe이 너무 크면 브로드캐스트 조인을 하기가 어려워집니다. driving dataframe이 있는 노드에 driven dataframe이 모두 복사되어 노드 간 셔플이 일어나지 않고 join이 가능해지는게 브로드캐스트 조인의 큰 장점인데, 데이터 자체가 너무 크면 노드 간 네트워크 비용도 많이 들고 메모리 부하도 너무 심해집니다.
 
-<img width="498" alt="image" src="../images/broadcast_join.png">
+<img width="498" alt="image" src="https://eprj453.github.io/images/broadcast_join.png">
 
 만약 몇 백억건 * 몇 억건 정도의 sort merge join을 broadcast join으로 변경하게 된다면, 거의 모든 노드에 driven dataframe의 몇억건 데이터가 올라가는 것이기 때문에 정상적으로 job이 처리되기 어려울 것입니다.
 
@@ -58,7 +58,7 @@ driven dataframe이 너무 크면 브로드캐스트 조인을 하기가 어려�
 
 skew join은 apache spark 3.0에서 추가된 AQE(Adaptive Query Execution)의 부가 기능 중 하나이며, skew라고 판단되는 파티션을 더 작은 파티션으로 분할해 자체적으로 data skew를 풀어내는 방법입니다. 아래 그림의 Partition: 1과 같이 파티션이 분할됩니다.
 
-<img width="498" alt="image" src="../images/1_YcAnB6yBHZaFc0_GS0qLww.webp">
+<img width="498" alt="image" src="https://eprj453.github.io/images/1_YcAnB6yBHZaFc0_GS0qLww.webp">
 
 skew partition을 판단하는 기준은 **하나의 파티션이 1GB 이상의 read size를 가지면 skew임! 처럼 정량적인 기준이 아닙니다**. 데이터의 크기 혹은 job 상황에 따라 skew라고 판단할 수 있는 상황이 다르기 때문입니다.
 
